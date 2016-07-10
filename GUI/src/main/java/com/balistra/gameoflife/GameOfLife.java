@@ -1,12 +1,19 @@
 package com.balistra.gameoflife;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.EventQueue;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.WindowConstants;
 
 public class GameOfLife {
 	private static final long WAIT_TIME = 3000;
@@ -60,12 +67,12 @@ public class GameOfLife {
 		btnStartSession.setBounds(6, 6, 117, 29);
 		frame.getContentPane().add(btnStartSession);
 
-		JButton btnNextBoard = new JButton(">");
+		JButton btnNextBoard = new JButton("<html>&gt;");
 		btnNextBoard.addActionListener(e -> showNextBoard());
 		btnNextBoard.setBounds(500, 6, 40, 29);
 		frame.getContentPane().add(btnNextBoard);
 
-		JButton btnPreviousBoard = new JButton("<");
+		JButton btnPreviousBoard = new JButton("<html>&lt;");
 		btnPreviousBoard.addActionListener(e -> showPreviousImage());
 		btnPreviousBoard.setBounds(450, 6, 40, 29);
 		frame.getContentPane().add(btnPreviousBoard);
