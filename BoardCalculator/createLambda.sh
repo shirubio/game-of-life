@@ -9,7 +9,7 @@ aws lambda delete-function \
 aws lambda create-function \
 --function-name GOLBoardCalculator \
 --runtime java8 \
---role arn:aws:iam::<YOUR ACCOUNT ID HERE>:role/lambda_basic_execution \
+--role arn:aws:iam::483594534433:role/lambda_basic_execution \
 --handler com.balistra.gameoflife.BoardCalculator \
 --description "Game of Life - Calculate Board Content" \
 --timeout 60 \
@@ -18,3 +18,7 @@ aws lambda create-function \
 --zip-file fileb://./target/BoardCalculator-0.0.1-SNAPSHOT.jar \
 --profile gameoflife
 
+
+#--generate-cli-skeleton 
+#--code #S3Bucket=demorais-game-of-life,S3Key=CreateGoLSessionIdCode,S3ObjectVersion=1 \
+          

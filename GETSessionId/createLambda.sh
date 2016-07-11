@@ -10,7 +10,7 @@ aws lambda delete-function \
 aws lambda create-function \
 --function-name GOLGetSessionId \
 --runtime java8 \
---role arn:aws:iam::<YOUR ACCOUNT ID HERE>:role/lambda_basic_execution \
+--role arn:aws:iam::483594534433:role/lambda_basic_execution \
 --handler com.balistra.gameoflife.CreateGoLSessionId \
 --description "Game of Life - GET Session ID" \
 --timeout 60 \

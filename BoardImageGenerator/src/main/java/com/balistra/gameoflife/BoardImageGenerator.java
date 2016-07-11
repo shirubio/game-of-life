@@ -1,6 +1,7 @@
 package com.balistra.gameoflife;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.SNSEvent;
 import com.amazonaws.services.lambda.runtime.events.SNSEvent.SNS;
@@ -30,16 +31,31 @@ public class BoardImageGenerator implements RequestHandler<SNSEvent, Object> {
     private static String sessionId = null;
     private static String index = null;
 
+    private static String JPEG = "jpg";
+    private static String JPEG_EXTENSION = ".jpg";
+    private LambdaLogger logger;
+    private         AWSHelper awsHelper;
+
+
     @Override
     public Object handleRequest(SNSEvent snsEvent, Context context) {
-        context.getLogger().log("Input: " + snsEvent);
+        logger = context.getLogger();
+        awsHelper = new AWSHelper(logger);
+
+        logger.log("Input: " + snsEvent);
+
         List<SNSRecord> records = snsEvent.getRecords();
+        logger.log("Passed 001");
         SNSRecord record = records.get(0);
+        logger.log("Passed 002");
         SNS sns = record.getSNS();
+        logger.log("Passed 003");
         String boardToProcess = sns.getMessage();
+        logger.log("Passed 004");
 
 
         processBoard(boardToProcess);
+        logger.log("Passed 005");
 
         return null;
     }
@@ -104,12 +120,12 @@ public class BoardImageGenerator implements RequestHandler<SNSEvent, Object> {
      * @throws IOException
      */
     private void store(BufferedImage img, String fileName) throws IOException {
-        File file = File.createTempFile(fileName, ".jpg");
-        fileName += ".jpg";
+        File file = File.createTempFile(fileName, JPEG_EXTENSION);
+        fileName += JPEG_EXTENSION;
         file.deleteOnExit();
 
         ImageWriter writer = null;
-        Iterator<ImageWriter> iter = ImageIO.getImageWritersByFormatName("jpg");
+        Iterator<ImageWriter> iter = ImageIO.getImageWritersByFormatName(JPEG);
         if (iter.hasNext()) {
             writer = iter.next();
         }
@@ -121,13 +137,8 @@ public class BoardImageGenerator implements RequestHandler<SNSEvent, Object> {
         param.setCompressionQuality(0.98f);
         writer.write(null, new IIOImage(img, null, null), param);
 
-        // Save the file to S3
-        PutObjectRequest request = new PutObjectRequest(AWSHelper.S3_NAME, fileName, file);
-        request.setCannedAcl(CannedAccessControlList.PublicRead);
-        AWSHelper.getS3().putObject(request);
-
-        // Save the information to DB
-        AWSHelper.storeNewImageOnDynamo(sessionId, index, AWSHelper.S3_ENDPOINT + fileName);
-
+        // Save the image to S3 and DynamoDB
+        awsHelper.saveImageToAWS(fileName, file, sessionId, index);
     }
+
 }

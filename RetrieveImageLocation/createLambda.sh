@@ -10,7 +10,7 @@ aws lambda delete-function \
 aws lambda create-function \
 --function-name GOLRetrieveImageLocation \
 --runtime java8 \
---role arn:aws:iam::<YOUR ACCOUNT ID HERE>:role/lambda_basic_execution \
+--role arn:aws:iam::483594534433:role/lambda_basic_execution \
 --handler com.balistra.gameoflife.RetrieveImageLocation \
 --description "Game of Life - GET the location of a JPEG image" \
 --timeout 60 \
