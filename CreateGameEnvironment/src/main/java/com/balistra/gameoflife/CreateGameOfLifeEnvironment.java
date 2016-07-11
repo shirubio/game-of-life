@@ -43,7 +43,7 @@ final class CreateGameOfLifeEnvironment {
     public static void main(String[] args) {
         OutputStream properties = null;
         try {
-            UUID uuid = java.util.UUID.randomUUID();
+            String uuid = "-" + java.util.UUID.randomUUID();
             Properties props = new Properties();
 
             // Create S3 Bucket
@@ -62,31 +62,10 @@ final class CreateGameOfLifeEnvironment {
             props.setProperty(snsTopicImagesARNProp, topicARN);
 
             // Create DynamoDB tables
-            String tableName = "GOL-SESSIONS";
-            String tableKey = "SESSION-ID";
+            createDDBTable(uuid, props, "GOL-SESSIONS", "SESSION-ID", ddbSessionTableNameProp, ddbSessionTableKeyNameProp);
+            createDDBTable(uuid, props, "GOL-IMAGES", "IMAGE-ID", ddbImageTableNameProp, ddbImageTableKeyNameProp);
 
-            CreateTableRequest createTableRequest = new CreateTableRequest().withTableName("GOL-SESSIONS" + uuid)
-                    .withKeySchema(new KeySchemaElement().withAttributeName("SESSION-ID").withKeyType(KeyType.HASH))
-                    .withAttributeDefinitions(new AttributeDefinition().withAttributeName("SESSION-ID")
-                            .withAttributeType(ScalarAttributeType.S))
-                    .withProvisionedThroughput(
-                            new ProvisionedThroughput().withReadCapacityUnits(1L).withWriteCapacityUnits(1L));
-            TableUtils.createTableIfNotExists(getDynamoDB(), createTableRequest);
-
-            props.setProperty(ddbSessionTableNameProp, "GOL-SESSIONS" + uuid);
-            props.setProperty(ddbSessionTableKeyNameProp, "SESSIONS-ID");
-
-            createTableRequest = new CreateTableRequest().withTableName("GOL-IMAGES" + uuid)
-                    .withKeySchema(new KeySchemaElement().withAttributeName("IMAGE-ID").withKeyType(KeyType.HASH))
-                    .withAttributeDefinitions(new AttributeDefinition().withAttributeName("IMAGE-ID")
-                            .withAttributeType(ScalarAttributeType.S))
-                    .withProvisionedThroughput(
-                            new ProvisionedThroughput().withReadCapacityUnits(1L).withWriteCapacityUnits(1L));
-            TableUtils.createTableIfNotExists(getDynamoDB(), createTableRequest);
-
-            props.setProperty(ddbImageTableNameProp, "GOL-IMAGES" + uuid);
-            props.setProperty(ddbImageTableKeyNameProp, "IMAGE-ID");
-
+            // Write the properties file
             properties = new FileOutputStream("GOL.properties");
             props.store(properties, null);
 
@@ -101,6 +80,19 @@ final class CreateGameOfLifeEnvironment {
                 }
             }
         }
+    }
+
+    private static void createDDBTable(String uuid, Properties props, String tableName, String tableKey, String tblPropName, String keyPropName) {
+        CreateTableRequest createTableRequest = new CreateTableRequest().withTableName(tableName + uuid)
+                .withKeySchema(new KeySchemaElement().withAttributeName(tableKey).withKeyType(KeyType.HASH))
+                .withAttributeDefinitions(new AttributeDefinition().withAttributeName(tableKey)
+                        .withAttributeType(ScalarAttributeType.S))
+                .withProvisionedThroughput(
+                        new ProvisionedThroughput().withReadCapacityUnits(1L).withWriteCapacityUnits(1L));
+        TableUtils.createTableIfNotExists(getDynamoDB(), createTableRequest);
+
+        props.setProperty(tblPropName, tableName + uuid);
+        props.setProperty(keyPropName, tableKey);
     }
 
     private static AmazonS3 getS3() {
